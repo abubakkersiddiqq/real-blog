@@ -75,7 +75,7 @@ All current CRUD operations can be tested using **Swagger UI**.
 ## Frontend Attribution
 The base HTML/CSS frontend structure is adapted from **Corey Schafer’s tutorial content** and used for learning and integration purposes.
 
-Backend architecture decisions — including CRUD separation, data validation, API design, and database integration — are independently implemented.
+Backend architecture decisions -- including CRUD separation, data validation, API design, and database integration - are independently implemented.
 
 ---
 
