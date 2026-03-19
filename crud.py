@@ -27,7 +27,7 @@ def get_post(db: Session, user_id: int = None, post_id: int = None):
     if post_id:
         query = query.where(models.Post.id == post_id)
     
-    return db.execute(query).scalars().first()
+    return db.execute(query).scalars().first() 
 
 def get_user_posts(db : Session, user_id: int = None):
     query = select(models.Post)
