@@ -1,24 +1,29 @@
+import os
+from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine 
 from sqlalchemy.orm import DeclarativeBase
 
 
-DATABASE_URL = "postgresql+psycopg2://postgres:123@127.0.0.1:5432/blog_db"
+
+load_dotenv()
+# 1. Changed to +asyncpg
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_async_engine(
     DATABASE_URL,
-    connect_args ={"check_same_thread": False},  
     echo=True
-    )
+)
 
 class Base(DeclarativeBase):
     pass
 
-#setup for session 
+# Setup for session factory
 AsyncSessionLocal = async_sessionmaker(
-    engine,
+    bind=engine,
     class_=AsyncSession,
     expire_on_commit=False
 )
+
 async def get_db():
-    async with AsyncSessionLocal as session:
+    async with AsyncSessionLocal() as session:
         yield session

@@ -1,15 +1,22 @@
 from fastapi import FastAPI, Request, status
+from fastapi.exception_handlers import http_exception_handler, request_validation_exception_handler
+from contextlib import asynccontextmanager
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse 
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from database import engine
+from database import engine,Base
 from routers import api, web
 import models
 
-models.Base.metadata.create_all(bind=engine)
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    await engine.dispose()   
+app = FastAPI(lifespan=lifespan)
 
 templates = Jinja2Templates(directory="templates")
 
