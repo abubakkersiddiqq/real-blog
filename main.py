@@ -2,13 +2,11 @@ from fastapi import FastAPI, Request, status
 from fastapi.exception_handlers import http_exception_handler, request_validation_exception_handler
 from contextlib import asynccontextmanager
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse 
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from database import engine,Base
-from routers import api, web
-import models
+from routers import users, posts, web
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -23,19 +21,23 @@ templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount('/media', StaticFiles(directory= "media"), name= "media")
 
+app.include_router(posts.router)
+app.include_router(users.router)
+app.include_router(web.router)
+
 
 @app.exception_handler(StarletteHTTPException)
-def general_http_exception_handler(request: Request, exception: StarletteHTTPException):
+async def general_http_exception_handler(request: Request, exception: StarletteHTTPException):
+
+    if request.url.path.startswith("/api"):
+        return await http_exception_handler(request, exception)
+    
     message = (
         exception.detail
         if exception.detail
         else "An error occurred. Please check your request and try again."
     )
-    if request.url.path.startswith("/api"):
-        return JSONResponse(
-            status_code=exception.status_code,
-            content={"detail": message},
-        )
+
     return templates.TemplateResponse(
         request,
         "error.html",
@@ -49,12 +51,9 @@ def general_http_exception_handler(request: Request, exception: StarletteHTTPExc
 
 
 @app.exception_handler(RequestValidationError)
-def validation_exception_handler(request: Request, exception: RequestValidationError):
+async def validation_exception_handler(request: Request, exception: RequestValidationError):
     if request.url.path.startswith("/api"):
-        return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            content={"detail": exception.errors()},
-        )
+        return await request_validation_exception_handler(request, exception)
     return templates.TemplateResponse(
         request,
         "error.html",
@@ -65,8 +64,3 @@ def validation_exception_handler(request: Request, exception: RequestValidationE
         },
         status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
     )
-
-app.include_router(api.router)
-app.include_router(web.router)
-
-
