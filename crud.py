@@ -13,13 +13,17 @@ async def all_post(db: AsyncSession):
     
 async def get_user(db: AsyncSession, user_id: int = None, username: str = None, email: str = None):
 
-    query = select(models.User).options(selectinload(models.User.posts))
+    query = select(models.User).options(
+        selectinload(models.User.posts).selectinload(models.Post.author)
+    )
+    
     if user_id:
         query = query.where(models.User.id == user_id)
     if username:
         query = query.where(models.User.username == username)
     if email:
         query = query.where(models.User.email == email)
+        
     result = await db.execute(query)
     return result.scalars().first()
 

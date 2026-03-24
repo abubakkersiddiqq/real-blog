@@ -1,7 +1,6 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends,status, HTTPException,Request
-from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
 from fastapi.templating import Jinja2Templates
