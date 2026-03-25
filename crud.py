@@ -1,13 +1,12 @@
 import models
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 from database import Base, engine
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-async def all_post(db: AsyncSession):
+async def all_post(db: AsyncSession, ):
     # Use selectinload so the 'author' data is ready for the HTML
-    query = select(models.Post).options(selectinload(models.Post.author))
+    query = select(models.Post).options(selectinload(models.Post.author)).order_by(models.Post.date_posted.desc())
     result = await db.execute(query)
     return result.scalars().all()
     
@@ -38,7 +37,7 @@ async def get_post(db: AsyncSession, user_id: int = None, post_id: int = None):
     return result.scalars().first() 
 
 async def get_user_posts(db: AsyncSession, user_id: int = None):
-    query = select(models.Post).options(selectinload(models.Post.author))
+    query = select(models.Post).options(selectinload(models.Post.author)).order_by(models.Post.date_posted.desc())
     if user_id:
             query = query.where(models.Post.user_id == user_id)
             result = await db.execute(query)
