@@ -1,13 +1,18 @@
 from typing import Annotated
+from datetime import timedelta
 
 from fastapi import APIRouter, Depends,status, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
+from auth import create_access_token, hash_password, verify_access_token, verify_password, oauth2_scheme
+from config import settings
 import crud, schema, models
+
 
 router = APIRouter(prefix="/api", tags=["users"])
 
-@router.post('/users', response_model= schema.UserResponse, status_code= status.HTTP_201_CREATED)
+@router.post('/users', response_model= schema.UserPrivate, status_code= status.HTTP_201_CREATED)
 async def create_user(user : schema.UserCreate, db : Annotated[AsyncSession, Depends(get_db)]):
     existing_user = await crud.get_user(db, username=user.username)
     if existing_user:
@@ -23,15 +28,76 @@ async def create_user(user : schema.UserCreate, db : Annotated[AsyncSession, Dep
         )
     new_user = models.User(
         username = user.username,
-        email = user.email,
+        email = user.email.lower(),
+        password_hash = hash_password(user.password)
     )
     db.add(new_user)
     await db.commit()
     await db.refresh(new_user)
     return new_user
 
+# token
+@router.post('/users/token', response_model= schema.Token)
+async def login_for_access_token(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Annotated[AsyncSession, Depends(get_db)]):
+    # Look up user by email (case-insensitive)
+    # Note: OAuth2PasswordRequestForm uses "username" field, but we treat it as email
+
+    user = await crud.get_user_for_login(db, form_data.username.lower())
+
+    # Verify user exists and password is correct
+    # Don't reveal which one failed (security best practice)
+    if not user or not verify_password(form_data.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Create access token with user id as subject
+    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+    access_token = create_access_token(
+        data={"sub": str(user.id)},
+        expires_delta=access_token_expires,
+    )
+    return schema.Token(access_token=access_token, token_type="bearer")
+
+# user
+@router.get("/me", response_model=schema.UserPrivate)
+async def get_current_user(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Get the currently authenticated user."""
+    user_id = verify_access_token(token)
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Validate user_id is a valid integer (defense against malformed JWT)
+    try:
+        user_id_int = int(user_id)
+    except (TypeError, ValueError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    user = await crud.get_user(db= db, user_id= user_id_int)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return user
+
+
 #api user 
-@router.get('/users/{user_id}', response_model= schema.UserResponse)
+@router.get('/users/{user_id}', response_model= schema.UserPublic)
 async def get_user(user_id : int, db: Annotated[AsyncSession, Depends(get_db)]):
     user = await crud.get_user(db, user_id= user_id)
     if user:
@@ -54,17 +120,20 @@ async def get_user_posts(user_id: int, db: Annotated[AsyncSession, Depends(get_d
         raise HTTPException(status_code=404, detail="User not found")
     return user.posts 
 
-@router.patch("/users/{user_id}", response_model=schema.UserResponse)
+@router.patch("/users/{user_id}", response_model=schema.UserPrivate)
 async def update_user(user_id : int, user_update: schema.UserUpdate, db: Annotated[AsyncSession, Depends(get_db)]):
     user = await crud.get_user(db, user_id=user_id)
+    
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "User not found")
-    if user_update.username is not None and user.username != user_update.username:  
-        existing_user = await crud.get_user(db, username= user_update.username)
+    
+    if user_update.username is not None and user.username.lower() != user_update.username.lower():  
+        existing_user = await crud.get_user_with_case(db, username= user_update.username)
         if existing_user :
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="username is already exist")
-    if user_update.email is not None and user.email != user_update.email:  
-        existing_email = await crud.get_user(db, email= user_update.email)
+    
+    if user_update.email is not None and user.email.lower() != user_update.email.lower():  
+        existing_email = await crud.get_user_with_case(db, email= user_update.email)
         if existing_email :
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="email is already exist")
         

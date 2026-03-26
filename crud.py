@@ -1,5 +1,5 @@
 import models
-from sqlalchemy import select
+from sqlalchemy import select, func
 from database import Base, engine
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -19,15 +19,40 @@ async def get_user(db: AsyncSession, user_id: int = None, username: str = None, 
     if user_id:
         query = query.where(models.User.id == user_id)
     if username:
-        query = query.where(models.User.username == username)
+        query = query.where(func.lower(models.User.username) == username.lower())
     if email:
-        query = query.where(models.User.email == email)
+        query = query.where(func.lower(models.User.email) == email.lower())
+        
+    result = await db.execute(query)
+    return result.scalars().first()
+
+# user verification (token)  
+from sqlalchemy import or_, func
+
+async def get_user_for_login(db: AsyncSession, identifier: str):
+    query = select(models.User).where(
+        or_(
+            func.lower(models.User.username) == identifier.lower(),
+            func.lower(models.User.email) == identifier.lower()
+        )
+    )
+    result = await db.execute(query)
+    return result.scalars().first()
+
+#verfication of username (database) and email
+async def get_user_with_case(db: AsyncSession, username : str = None, email: str = None): # Formdata.username.lower
+    query = select(models.User)
+    
+    if username:
+        query = query.where(func.lower(models.User.username) == username.lower())
+
+    if email:
+        query = query.where(func.lower(models.User.email) == email.lower())
         
     result = await db.execute(query)
     return result.scalars().first()
 
 async def get_post(db: AsyncSession, user_id: int = None, post_id: int = None):
-
     query = select(models.Post).options(selectinload(models.Post.author))
     if user_id:
         query = query.where(models.Post.user_id == user_id)

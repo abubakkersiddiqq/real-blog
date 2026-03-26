@@ -7,8 +7,9 @@ class Settings(BaseSettings):
         env_file_encoding= "utf-8"
     )
     
+    database_url: str
     secret_key: SecretStr 
     algorithm: str = "HS256" 
-    access_token_expiry_minutes: int = 30
+    access_token_expire_minutes: int = 30
     
 settings = Settings() #Loaded from env file
