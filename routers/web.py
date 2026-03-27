@@ -15,7 +15,7 @@ templates = Jinja2Templates(directory="templates")
 @router.get("/", include_in_schema= False, name='home')
 @router.get("/posts", include_in_schema= False, name='posts')
 async def home(request : Request, db : Annotated[AsyncSession, Depends(get_db)]):
-    posts = await crud.all_post(db)
+    posts = await crud.list_posts(db)
     return templates.TemplateResponse(
        "home.html",
        {
@@ -28,7 +28,7 @@ async def home(request : Request, db : Annotated[AsyncSession, Depends(get_db)])
 #html specifc post
 @router.get("/posts/{post_id}", include_in_schema= False)
 async def post_page(request: Request, post_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
-    post = await crud.get_post(db , post_id=post_id)
+    post = await crud.get_post_by_id(db , post_id=post_id)
     if post:
         title = post.title[:50]
         return templates.TemplateResponse(
@@ -44,10 +44,10 @@ async def post_page(request: Request, post_id: int, db: Annotated[AsyncSession, 
 #html user posts
 @router.get("/users/{user_id}/posts", include_in_schema= False, name="user_posts")
 async def user_posts_page(request: Request, user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
-    user = await crud.get_user(db, user_id= user_id)
+    user = await crud.get_user_with_posts(db, user_id= user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "user not found")
-    posts = await crud.get_user_posts(db,user_id= user_id)
+    posts = await crud.get_posts_by_user(db,user_id= user_id)
     return templates.TemplateResponse(
         "user_posts.html",
         {

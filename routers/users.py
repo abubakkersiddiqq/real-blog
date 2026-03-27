@@ -14,13 +14,13 @@ router = APIRouter(prefix="/api", tags=["users"])
 
 @router.post('/users', response_model= schema.UserPrivate, status_code= status.HTTP_201_CREATED)
 async def create_user(user : schema.UserCreate, db : Annotated[AsyncSession, Depends(get_db)]):
-    existing_user = await crud.get_user(db, username=user.username)
+    existing_user = await crud.get_user_with_posts(db, username=user.username)
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail= "Username is already exist"
         )
-    existing_email = await crud.get_user(db, email=user.email)
+    existing_email = await crud.get_user_with_posts(db, email=user.email)
     if existing_email:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -43,7 +43,7 @@ async def login_for_access_token(
     # Look up user by email (case-insensitive)
     # Note: OAuth2PasswordRequestForm uses "username" field, but we treat it as email
 
-    user = await crud.get_user_for_login(db, form_data.username.lower())
+    user = await crud.get_user_for_auth(db, form_data.username.lower())
 
     # Verify user exists and password is correct
     # Don't reveal which one failed (security best practice)
@@ -86,7 +86,7 @@ async def get_current_user(
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    user = await crud.get_user(db= db, user_id= user_id_int)
+    user = await crud.get_user_with_posts(db= db, user_id= user_id_int)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -99,14 +99,14 @@ async def get_current_user(
 #api user 
 @router.get('/users/{user_id}', response_model= schema.UserPublic)
 async def get_user(user_id : int, db: Annotated[AsyncSession, Depends(get_db)]):
-    user = await crud.get_user(db, user_id= user_id)
+    user = await crud.get_user_with_posts(db, user_id= user_id)
     if user:
         return user
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "User not found")
 
 @router.delete("/users/{user_id}", status_code =status.HTTP_204_NO_CONTENT)
 async def delete_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
-    user = await crud.get_user(db, user_id=user_id)
+    user = await crud.get_user_with_posts(db, user_id=user_id)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "User not found")
     
@@ -115,25 +115,25 @@ async def delete_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]
 
 @router.get('/users/{user_id}/posts', response_model=list[schema.PostResponse])
 async def get_user_posts(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
-    user = await crud.get_user(db, user_id=user_id)
+    user = await crud.get_user_with_posts(db, user_id=user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user.posts 
 
 @router.patch("/users/{user_id}", response_model=schema.UserPrivate)
 async def update_user(user_id : int, user_update: schema.UserUpdate, db: Annotated[AsyncSession, Depends(get_db)]):
-    user = await crud.get_user(db, user_id=user_id)
+    user = await crud.get_user_with_posts(db, user_id=user_id)
     
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "User not found")
     
     if user_update.username is not None and user.username.lower() != user_update.username.lower():  
-        existing_user = await crud.get_user_with_case(db, username= user_update.username)
+        existing_user = await crud. get_user_by_username_or_email(db, username= user_update.username)
         if existing_user :
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="username is already exist")
     
     if user_update.email is not None and user.email.lower() != user_update.email.lower():  
-        existing_email = await crud.get_user_with_case(db, email= user_update.email)
+        existing_email = await crud.get_user_by_username_or_email(db, email= user_update.email)
         if existing_email :
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="email is already exist")
         
