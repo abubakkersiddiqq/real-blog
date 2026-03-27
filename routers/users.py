@@ -63,7 +63,7 @@ async def login_for_access_token(
     return schema.Token(access_token=access_token, token_type="bearer")
 
 # user
-@router.get("/me", response_model=schema.UserPrivate)
+@router.get("/users/me", response_model=schema.UserPrivate)
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[AsyncSession, Depends(get_db)],

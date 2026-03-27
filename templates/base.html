@@ -78,11 +78,6 @@
             </div>
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
-              <!-- NOTE: Once auth is set up, this button will only be visible when logged in -->
-              <button class="btn btn-outline-light mb-2 mb-md-0 me-md-2"
-                      type="button"
-                      data-bs-toggle="modal"
-                      data-bs-target="#createPostModal">New Post</button>
               <!-- Shown when logged in (hidden by default, shown via JS) -->
               <div id="loggedInNav" class="d-none">
                 <button class="btn btn-outline-light mb-2 mb-md-0 me-md-2"
@@ -290,10 +285,12 @@
     }
   }
   // Logout handler
-  document.getElementById('logoutBtn').addEventListener('click', logout);
-
+  const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', logout);
+}
   // Update UI on page load
-  updateAuthUI();
+  document.addEventListener("DOMContentLoaded", updateAuthUI);
     </script>
     <!-- Create Post Form Handler -->
     <script type="module">
