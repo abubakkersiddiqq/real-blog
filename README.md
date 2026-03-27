@@ -1,105 +1,141 @@
-# Blog Application (FastAPI – Backend-Centric Full Stack Project)
+# real-blog — FastAPI Full Stack Blog Platform
 
-## Overview
-This project is a **backend-focused full stack blog application** built using **FastAPI**, designed to demonstrate strong fundamentals in API design, data validation, database interaction, and clean project structure.
-
-The application supports both:
-- **HTML responses** for browser-based interaction
-- **REST API responses** documented and testable via **Swagger (OpenAPI)**
-
-Authentication and authorization are intentionally not implemented yet to keep the focus on **core backend correctness and logic**.
+> A backend-first blog application built with FastAPI, PostgreSQL, and SQLAlchemy. Real Blog is designed as a learning ground for system architecture, authentication/authorization patterns, and AI integration.
 
 ---
 
 ## Tech Stack
-- **Backend:** Python (FastAPI)
-- **Database:** PostgreSQL
-- **ORM:** SQLAlchemy
-- **Validation:** Pydantic
-- **Frontend:** HTML, CSS (server-rendered)
-- **API Docs:** Swagger / OpenAPI (FastAPI built-in)
+
+| Layer      | Technology                            |
+| ---------- | ------------------------------------- |
+| Backend    | Python · FastAPI                      |
+| Database   | PostgreSQL                            |
+| ORM        | SQLAlchemy (async)                    |
+| Validation | Pydantic v2                           |
+| Frontend   | HTML · CSS · Jinja2 (server-rendered) |
+| API Docs   | Swagger UI / OpenAPI (built-in)       |
 
 ---
 
-## Project Architecture
-- FastAPI for API-first development
-- SQLAlchemy ORM for database models and persistence
-- PostgreSQL as a real relational database (not in-memory or mock)
-- Pydantic schemas for request/response validation
-- CRUD logic separated into dedicated modules for maintainability
-- Clear separation between API routes and HTML-rendering routes
+## Project Structure
+
+```
+real-blog/
+├── main.py           # App entrypoint, exception handlers, lifespan
+├── database.py       # Async engine + session setup
+├── models.py         # SQLAlchemy ORM models
+├── schema.py         # Pydantic request/response schemas
+├── crud.py           # DB operations, separated from route logic
+├── routers/
+│   ├── users.py      # User API endpoints
+│   ├── posts.py      # Post API endpoints
+│   └── web.py        # HTML-rendering routes
+├── templates/        # Jinja2 HTML templates
+├── static/           # CSS, JS, assets
+└── media/            # User-uploaded profile pictures
+```
+
+---
+
+## Architecture Highlights
+
+**Dual response system** - every route serves both a browser-facing HTML response and a JSON API response, with routing determined by the request path (`/api/*` for JSON, everything else for HTML).
+
+**Layered separation** - CRUD logic lives in `crud.py`, schemas in `schema.py`, models in `models.py`. Routes stay thin and readable.
+
+**Async-first** - the app uses `asynccontextmanager` for lifespan management and an async SQLAlchemy engine, making it ready to scale without blocking I/O.
+
+**Graceful error handling** - custom exception handlers for HTTP errors and validation errors, returning HTML error pages for browser requests and JSON for API requests.
 
 ---
 
 ## Features Implemented
 
-### Dual Response System
-- HTML endpoints for UI-based interaction
-- REST API endpoints accessible and testable via Swagger UI
+### Authentication
 
-### User Management (CRUD)
-- Create user
-- Update user
-- Delete user
-- Retrieve user(s)
+- JWT-based authentication (in progress)
+- Password hashing with bcrypt
+- Token issuance and verification
 
-### Post Management (CRUD)
-- Create post
-- Update post
-- Delete post
-- Retrieve post(s)
+### User Management
+
+- Create, read, update, delete users
+- Profile picture upload support
+
+### Post Management
+
+- Create, read, update, delete blog posts
+- Author relationship enforced at the schema level
 
 ### Data Validation
-- Strict backend-level validation using Pydantic schemas
-- Invalid or malformed input rejected before database operations
+
+- Pydantic schemas enforce strict input validation before any DB operation
 - Consistent schema enforcement across API and HTML flows
 
-### Database Integration
-- PostgreSQL connected using SQLAlchemy
-- Persistent relational data
-- Defined models with constraints and relationships
+### Database
+
+- PostgreSQL with async SQLAlchemy
+- Auto table creation via lifespan hook
+- Proper model relationships and constraints
 
 ---
 
-## What Is Not Implemented Yet
-- Authentication / authorization
-- Login or signup system
-- Role-based access control
-- React or SPA frontend
-- Production deployment
+## What's In Progress / Planned
 
-All current CRUD operations can be tested using **Swagger UI**.
+| Feature                                      | Status         |
+| -------------------------------------------- | -------------- |
+| JWT Authentication                           | 🔄 In progress |
+| Role-based Authorization                     | 🔜 Next        |
+| Pagination & filtering                       | Planned        |
+| AI content features (summarization, tagging) | Planned        |
+| Docker + deployment                          | Planned        |
+
+---
+
+## Running Locally
+
+```bash
+# Clone the repo
+git clone https://github.com/abubakkersiddiqq/real-blog
+cd real-blog
+
+# Create a virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set environment variables
+export DATABASE_URL=postgresql+asyncpg://user:password@localhost/blog_db
+export SECRET_KEY=your-secret-key
+
+# Run the server
+uvicorn main:app --reload
+```
+
+API docs available at: `http://localhost:8000/docs`
+
+---
+
+## Learning Goals
+
+This project is being built to develop a strong understanding of:
+
+- Backend system architecture with FastAPI
+- Authentication and authorization patterns (JWT, RBAC)
+- Clean separation of concerns in a layered architecture
+- Async database access with SQLAlchemy
+- Foundations for integrating AI/LLM APIs into backend systems
 
 ---
 
 ## Frontend Attribution
-The base HTML/CSS frontend structure is adapted from **Corey Schafer’s tutorial content** and used for learning and integration purposes.
 
-Backend architecture decisions -- including CRUD separation, data validation, API design, and database integration - are independently implemented.
-
----
-
-## Purpose of This Project
-This project demonstrates:
-- Real backend development using FastAPI
-- Correct use of SQLAlchemy with PostgreSQL
-- Clean CRUD architecture
-- Proper data validation and error handling
-- API-first design with optional HTML rendering
-- A scalable foundation for production-ready systems
-
-This is a **backend- and logic-first project**, not a UI showcase.
+The base HTML/CSS frontend structure is adapted from Corey Schafer's tutorial content, used for learning purposes. All backend architecture including CRUD separation, schema design, async setup, and API design - is independently implemented.
 
 ---
 
-## Planned Enhancements
-- Authentication and protected routes
-- React frontend
-- Pagination and filtering
-- Dockerization and deployment
+## License
 
----
-
-## Status
-Core backend complete.  
-Authentication and frontend planned.
+MIT
