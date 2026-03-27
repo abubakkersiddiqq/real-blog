@@ -211,3 +211,11 @@ description.txt
 
 #prettier
 templates/.prettierrc
+templates/.prettierignore
+
+# vs
+.vscode
+
+# format
+
+pyproject.toml
