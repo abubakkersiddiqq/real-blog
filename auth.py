@@ -77,7 +77,7 @@ async def get_current_user(
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    user = crud.get_user_by_id(db=db, user_id=user_id_int)
+    user = await crud.get_user_by_id(db=db, user_id=user_id_int)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -85,3 +85,5 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user
+
+Current_User = Annotated[models.User, Depends(get_current_user)]

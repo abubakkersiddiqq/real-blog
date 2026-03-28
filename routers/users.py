@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends,status, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
-from auth import create_access_token, hash_password, verify_access_token, verify_password, oauth2_scheme
+from auth import create_access_token, hash_password, Current_User, verify_password
 from config import settings
 import crud, schema, models
 
@@ -64,36 +64,8 @@ async def login_for_access_token(
 
 # user
 @router.get("/users/me", response_model=schema.UserPrivate)
-async def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)],
-    db: Annotated[AsyncSession, Depends(get_db)],
-):
-    """Get the currently authenticated user."""
-    user_id = verify_access_token(token)
-    if user_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    # Validate user_id is a valid integer (defense against malformed JWT)
-    try:
-        user_id_int = int(user_id)
-    except (TypeError, ValueError):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    user = await crud.get_user_with_posts(db= db, user_id= user_id_int)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return user
+async def get_current_user(current_user: Current_User):
+    return current_user
 
 
 #api user 
@@ -104,14 +76,6 @@ async def get_user(user_id : int, db: Annotated[AsyncSession, Depends(get_db)]):
         return user
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "User not found")
 
-@router.delete("/users/{user_id}", status_code =status.HTTP_204_NO_CONTENT)
-async def delete_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
-    user = await crud.get_user_with_posts(db, user_id=user_id)
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "User not found")
-    
-    await db.delete(user)
-    await db.commit()
 
 @router.get('/users/{user_id}/posts', response_model=list[schema.PostResponse])
 async def get_user_posts(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
@@ -121,7 +85,11 @@ async def get_user_posts(user_id: int, db: Annotated[AsyncSession, Depends(get_d
     return user.posts 
 
 @router.patch("/users/{user_id}", response_model=schema.UserPrivate)
-async def update_user(user_id : int, user_update: schema.UserUpdate, db: Annotated[AsyncSession, Depends(get_db)]):
+async def update_user(user_id : int, user_update: schema.UserUpdate, current_user: Current_User, db: Annotated[AsyncSession, Depends(get_db)]):
+    
+    if user_id != current_user.id:
+         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail= "Not Authorized to update this user")
+    
     user = await crud.get_user_with_posts(db, user_id=user_id)
     
     if not user:
@@ -147,3 +115,15 @@ async def update_user(user_id : int, user_update: schema.UserUpdate, db: Annotat
     await db.commit()
     await db.refresh(user)
     return user
+
+@router.delete("/users/{user_id}", status_code =status.HTTP_204_NO_CONTENT)
+async def delete_user(user_id: int, current_user: Current_User, db: Annotated[AsyncSession, Depends(get_db)]):
+    if user_id != current_user.id:
+       raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail= "Not Authorized to delete this User")
+    
+    user = await crud.get_user_with_posts(db, user_id=user_id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "User not found")
+    
+    await db.delete(user)
+    await db.commit()
