@@ -1,6 +1,6 @@
-# real-blog — FastAPI Full Stack Blog Platform
+# real-blog - FastAPI Full Stack Blog Platform
 
-> A backend-first blog application built with FastAPI, PostgreSQL, and SQLAlchemy. Real Blog is designed as a learning ground for system architecture, authentication/authorization patterns, and AI integration.
+> A backend-first blog application built with FastAPI, PostgreSQL, and SQLAlchemy. Designed as a learning ground for production system architecture, authentication/authorization patterns, and AI integration.
 
 ---
 
@@ -12,6 +12,7 @@
 | Database   | PostgreSQL                            |
 | ORM        | SQLAlchemy (async)                    |
 | Validation | Pydantic v2                           |
+| Auth       | JWT · bcrypt                          |
 | Frontend   | HTML · CSS · Jinja2 (server-rendered) |
 | API Docs   | Swagger UI / OpenAPI (built-in)       |
 
@@ -45,17 +46,18 @@ real-blog/
 
 **Async-first** - the app uses `asynccontextmanager` for lifespan management and an async SQLAlchemy engine, making it ready to scale without blocking I/O.
 
-**Graceful error handling** - custom exception handlers for HTTP errors and validation errors, returning HTML error pages for browser requests and JSON for API requests.
+**Graceful error handling** - custom exception handlers for HTTP errors and validation errors, returning HTML error pages for browser requests and JSON for API responses.
 
 ---
 
 ## Features Implemented
 
-### Authentication
+### Authentication & Authorization
 
-- JWT-based authentication (in progress)
+- JWT-based authentication - token issuance, verification, and expiry
 - Password hashing with bcrypt
-- Token issuance and verification
+- Protected routes using FastAPI dependency injection
+- Owner-only authorization - users can only edit or delete their own posts and their own account
 
 ### User Management
 
@@ -65,12 +67,12 @@ real-blog/
 ### Post Management
 
 - Create, read, update, delete blog posts
-- Author relationship enforced at the schema level
+- Author relationship enforced at the schema and authorization level
 
 ### Data Validation
 
-- Pydantic schemas enforce strict input validation before any DB operation
-- Consistent schema enforcement across API and HTML flows
+- Pydantic v2 schemas enforce strict input validation before any DB operation
+- Consistent schema enforcement across both API and HTML flows
 
 ### Database
 
@@ -80,17 +82,11 @@ real-blog/
 
 ---
 
-## What's In Progress / Planned
+## Status
 
-| Feature                                      | Status         |
-| -------------------------------------------- | -------------- |
-| JWT Authentication                           | 🔄 In progress |
-| Role-based Authorization                     | 🔜 Next        |
-| Pagination & filtering                       | Planned        |
-| AI content features (summarization, tagging) | Planned        |
-| Docker + deployment                          | Planned        |
-
----
+Auth and authorization are complete. Currently working on Docker and deployment.
+After deployment: pagination, file uploads, and image validation.
+Longer term: AI features like post summarization and auto-tagging via LLM.
 
 ## Running Locally
 
@@ -122,17 +118,18 @@ API docs available at: `http://localhost:8000/docs`
 
 This project is being built to develop a strong understanding of:
 
-- Backend system architecture with FastAPI
-- Authentication and authorization patterns (JWT, RBAC)
+- Production backend architecture with FastAPI
+- Authentication and authorization patterns (JWT, ownership-based access)
 - Clean separation of concerns in a layered architecture
 - Async database access with SQLAlchemy
-- Foundations for integrating AI/LLM APIs into backend systems
+- Containerization with Docker and cloud deployment
+- Foundations for integrating AI/LLM features into backend systems
 
 ---
 
 ## Frontend Attribution
 
-The base HTML/CSS frontend structure is adapted from Corey Schafer's tutorial content, used for learning purposes. All backend architecture including CRUD separation, schema design, async setup, and API design - is independently implemented.
+The base HTML/CSS frontend structure is adapted from Corey Schafer's tutorial content, used for learning purposes. All backend architecture — including CRUD separation, schema design, async setup, JWT auth, and API design — is independently implemented.
 
 ---
 
