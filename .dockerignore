@@ -1,0 +1,9 @@
+__pycache__
+routers/__pycache__
+.git
+.env
+venv
+templates/.prettierrc
+description.txt
+pyproject.toml
+
