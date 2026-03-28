@@ -30,7 +30,7 @@ class Token(BaseModel):
 
 class PostBase(BaseModel):
     title : str = Field(min_length= 1, max_length= 100)
-    content: str = Field(max_length=220)
+    content: str = Field(min_length=1)
     
 
 class PostCreate(PostBase):
