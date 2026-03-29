@@ -64,10 +64,10 @@ real-blog/
 
 ### Authentication & Authorization
 
-- JWT-based authentication — token issuance, verification, and expiry
+- JWT-based authentication - token issuance, verification, and expiry
 - Password hashing with bcrypt
 - Protected routes using FastAPI dependency injection
-- Owner-only authorization — users can only edit or delete their own posts and their own account
+- Owner-only authorization - users can only edit or delete their own posts and their own account
 
 ### User Management
 
@@ -156,7 +156,7 @@ This project was built to develop a strong understanding of:
 
 ## Frontend Attribution
 
-The base HTML/CSS frontend structure is adapted from Corey Schafer's tutorial content, used for learning purposes. All backend architecture — including CRUD separation, schema design, async setup, JWT auth, authorization, and Docker deployment — is independently implemented.
+The base HTML/CSS frontend structure is adapted from Corey Schafer's tutorial content, used for learning purposes. All backend architecture - including CRUD separation, schema design, async setup, JWT auth, authorization, and Docker deployment - is independently implemented.
 
 ---
 
