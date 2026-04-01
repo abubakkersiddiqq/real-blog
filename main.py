@@ -25,6 +25,9 @@ app.include_router(posts.router)
 app.include_router(users.router)
 app.include_router(web.router)
 
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
 
 @app.exception_handler(StarletteHTTPException)
 async def general_http_exception_handler(request: Request, exception: StarletteHTTPException):
