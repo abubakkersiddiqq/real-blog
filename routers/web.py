@@ -14,7 +14,7 @@ templates = Jinja2Templates(directory="templates")
 
 @router.head("/", include_in_schema=False) # Explicitly handle HEAD
 @router.get("/", include_in_schema= False, name='home')
-@router.get("/posts", include_in_schema= False, name='posts',methods=["GET", "HEAD"])
+@router.get("/posts", include_in_schema= False, name='posts')
 async def home(request : Request, db : Annotated[AsyncSession, Depends(get_db)]):
     posts = await crud.list_posts(db)
     return templates.TemplateResponse(
