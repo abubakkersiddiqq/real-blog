@@ -12,7 +12,8 @@ router = APIRouter(tags=["Frontend"])
 templates = Jinja2Templates(directory="templates")
 
 
-@router.get("/", include_in_schema= False, name='home',methods=["GET", "HEAD"])
+@router.head("/", include_in_schema=False) # Explicitly handle HEAD
+@router.get("/", include_in_schema= False, name='home')
 @router.get("/posts", include_in_schema= False, name='posts',methods=["GET", "HEAD"])
 async def home(request : Request, db : Annotated[AsyncSession, Depends(get_db)]):
     posts = await crud.list_posts(db)
