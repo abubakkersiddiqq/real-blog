@@ -29,6 +29,7 @@ app.include_router(web.router)
 async def health_check():
     return {"status": "ok"}
 
+
 @app.exception_handler(StarletteHTTPException)
 async def general_http_exception_handler(request: Request, exception: StarletteHTTPException):
 
