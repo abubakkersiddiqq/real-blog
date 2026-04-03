@@ -4,7 +4,7 @@
 
 **Live:** https://real-blog.onrender.com
 
----
+## _Note: If the app doesn’t load (cold start), open https://real-blog.onrender.com/health once, then revisit the main link._
 
 ## Tech Stack
 
@@ -25,7 +25,7 @@
 
 ```
 real-blog/
-├── main.py               # App entrypoint, exception handlers, lifespan
+├── main.py               # App entrypoint, exception handlers, lifespan, health
 ├── database.py           # Async engine + session setup
 ├── models.py             # SQLAlchemy ORM models
 ├── schema.py             # Pydantic request/response schemas
@@ -37,7 +37,7 @@ real-blog/
 ├── templates/            # Jinja2 HTML templates
 ├── static/               # CSS, JS, assets
 ├── media/
-│   └── profile_pics/     # User-uploaded profile pictures
+│   └── profile_pics/     # User-uploaded profile pictures -(for now - we use default image)
 ├── Dockerfile            # Container build instructions
 ├── docker-compose.yml    # Local dev orchestration (app + PostgreSQL)
 ├── requirements.txt      # Production dependencies
