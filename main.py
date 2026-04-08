@@ -5,6 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi.routing import APIRoute
 from database import engine,Base
 from routers import users, posts, web
 
@@ -25,10 +26,9 @@ app.include_router(posts.router)
 app.include_router(users.router)
 app.include_router(web.router)
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health_check():
     return {"status": "ok"}
-
 
 @app.exception_handler(StarletteHTTPException)
 async def general_http_exception_handler(request: Request, exception: StarletteHTTPException):
