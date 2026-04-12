@@ -2,6 +2,10 @@
 
 > A backend-first blog application built with FastAPI, PostgreSQL, and SQLAlchemy. Designed as a learning ground for production system architecture, authentication/authorization patterns, and AI integration.
 
+> 🚧 **Note:** The live link may be down. This project is hosted on Render's
+> free tier (750hr/month limit). If the demo doesn't load, it's likely
+> suspended. Feel free to run it locally using the instructions below.
+
 **Live:** https://real-blog.onrender.com
 
 ## _Note: If the app doesn’t load (cold start), open https://real-blog.onrender.com/health once, then revisit the main link._
