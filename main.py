@@ -5,9 +5,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from fastapi.routing import APIRoute
 from database import engine,Base
 from routers import users, posts, web
+
+
+
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -19,12 +21,19 @@ app = FastAPI(lifespan=lifespan)
 
 templates = Jinja2Templates(directory="templates")
 
+@app.middleware("http")
+async def https_middleware(request: Request, call_next):
+    request.scope["scheme"] = "https"
+    response = await call_next(request)
+    return response
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount('/media', StaticFiles(directory= "media"), name= "media")
 
 app.include_router(posts.router)
 app.include_router(users.router)
 app.include_router(web.router)
+
 
 @app.api_route("/health", methods=["GET", "HEAD"])
 async def health_check():
