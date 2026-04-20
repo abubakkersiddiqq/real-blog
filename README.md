@@ -2,13 +2,9 @@
 
 > A backend-first blog application built with FastAPI, PostgreSQL, and SQLAlchemy. Designed as a learning ground for production system architecture, authentication/authorization patterns, and AI integration.
 
-> 🚧 **Note:** The live link may be down. This project is hosted on Render's
-> free tier (750hr/month limit). If the demo doesn't load, it's likely
-> suspended. Feel free to run it locally using the instructions below.
+**Live:** https://prolific-endurance-production-67bd.up.railway.app/
 
-**Live:** https://real-blog.onrender.com
-
-## _Note: If the app doesn’t load (cold start), open https://real-blog.onrender.com/health once, then revisit the main link._
+---
 
 ## Tech Stack
 
@@ -20,7 +16,7 @@
 | Validation | Pydantic v2                           |
 | Auth       | JWT · bcrypt                          |
 | Frontend   | HTML · CSS · Jinja2 (server-rendered) |
-| DevOps     | Docker · Render                       |
+| DevOps     | Docker · Railway                      |
 | API Docs   | Swagger UI / OpenAPI (built-in)       |
 
 ---
@@ -41,7 +37,7 @@ real-blog/
 ├── templates/            # Jinja2 HTML templates
 ├── static/               # CSS, JS, assets
 ├── media/
-│   └── profile_pics/     # User-uploaded profile pictures -(for now - we use default image)
+│   └── profile_pics/     # User-uploaded profile pictures (default image used for now)
 ├── Dockerfile            # Container build instructions
 ├── docker-compose.yml    # Local dev orchestration (app + PostgreSQL)
 ├── requirements.txt      # Production dependencies
@@ -60,7 +56,7 @@ real-blog/
 
 **Graceful error handling** - custom exception handlers for HTTP errors and validation errors, returning HTML error pages for browser requests and JSON for API responses.
 
-**Containerized** - fully Dockerized with a multi-service `docker-compose.yml` for local development. Deployed to Render via Docker.
+**Containerized** - fully Dockerized with a multi-service `docker-compose.yml` for local development. Deployed to Railway via Docker.
 
 ---
 
@@ -99,7 +95,7 @@ real-blog/
 
 ## Status
 
-Authentication and authorization are complete. The app is fully containerized with Docker and deployed live on Render with Supabase as the database.
+Authentication and authorization are complete. The app is fully containerized with Docker and deployed live on Railway with Supabase as the database.
 
 Next up: pagination, filtering, file uploads, and image validation.
 
