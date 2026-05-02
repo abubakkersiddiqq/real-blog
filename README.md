@@ -2,7 +2,7 @@
 
 > A backend-first blog application built with FastAPI, PostgreSQL, and SQLAlchemy. Designed as a learning ground for production system architecture, authentication/authorization patterns, and AI integration.
 
-**Live:** https://prolific-endurance-production-67bd.up.railway.app/
+**Live:** [https://prolific-endurance-production-67bd.up.railway.app/](https://real-blog.onrender.com/)
 
 ---
 
